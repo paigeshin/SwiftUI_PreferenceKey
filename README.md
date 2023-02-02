@@ -45,3 +45,39 @@ extension View {
 ```
 
 ### Practical Usage 
+
+```swift
+extension View {
+  func readSize(onChange: @escaping (CGSize) -> Void) -> some View {
+    background(
+      GeometryReader { geometryProxy in
+        Color.clear
+          .preference(key: SizePreferenceKey.self, value: geometryProxy.size)
+      }
+    )
+    .onPreferenceChange(SizePreferenceKey.self, perform: onChange)
+  }
+}
+
+private struct SizePreferenceKey: PreferenceKey {
+  static var defaultValue: CGSize = .zero
+  static func reduce(value: inout CGSize, nextValue: () -> CGSize) {}
+}
+
+struct ContentView: View {
+    @State private var commonSize = CGSize()
+    var body: some View {
+        VStack {
+        Text("Hello, world!")
+            .padding()
+            .border(.yellow, width: 1)
+            .readSize { textSize in
+                commonSize = textSize
+            }
+        Rectangle()
+                .foregroundColor(.yellow)
+            .frame(width: commonSize.width, height: commonSize.height)
+        }
+    }
+}
+```
